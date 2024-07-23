@@ -16,7 +16,7 @@ export const getUser = async (req, res) => {
   const { id } = req.params;
   try {
     response = await Users.findOne({
-      where: [{ id: id }],
+      where: [{ uuid: id }],
     });
     res.status(200).json(response);
   } catch (error) {

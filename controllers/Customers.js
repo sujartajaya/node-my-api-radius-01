@@ -1,4 +1,7 @@
 import Customers from "../models/CustomersModel.js";
+import Users from "../models/UsersModel.js";
+import CustomerLogin from "../models/CustomerLoginModel.js";
+import bcrypt from "bcrypt";
 
 export const getCustomers = async (req, res) => {
   let response;
@@ -17,7 +20,7 @@ export const getCustomer = async (req, res) => {
     response = await Customers.findOne({
       where: [
         {
-          uuid: id,
+          uuid: id, 
         },
       ],
     });
@@ -63,6 +66,7 @@ export const updateCustomer = async (req, res) => {
       },
       { where: [{ uuid: id }] },
     );
+    res.header("Access-Control-Allow-Origin", "*");
     res.status(200).json({ msg: "Customer updated!" });
   } catch (error) {
     res.status(500).json({ msg: error.message });
@@ -79,3 +83,55 @@ export const deleteCustomer = async (req, res) => {
     res.status(500).json({ msg: error.message });
   }
 };
+
+export const getUserCustomers = async (req, res) => {
+  let response;
+  const { id } = req.params;
+  try {
+    response = await Customers.findOne({
+      include: [{ model: Users }],
+      where: [
+        {
+          uuid: id,
+        },
+      ],
+    });
+    res.status(200).json(response);
+  } catch (error) {
+    res.status(500).json({ msg: error.message });
+  }
+};
+
+export const createLogin = async (req, res) => {
+  const { username, password, role, customerId } = req.body;
+  try {
+    const salt = await bcrypt.genSalt();
+    const hashPassword = await bcrypt.hash(password, salt);
+    await CustomerLogin.create({
+      username: username,
+      password: hashPassword,
+      role: role,
+      customerId: customerId,
+    });
+    res.status(201).json({ msg: "Login created!" });
+  } catch (error) {
+    res.status(500).json({ msg: error.message });
+  }
+} 
+
+export const getCustomerById = async (req, res) => {
+  let response;
+  const { id } = req.params;
+  try {
+    response = await Customers.findOne({
+      where: [
+        {
+          id: id,
+        },
+      ],
+    });
+    res.status(200).json(response);
+  } catch (error) {
+    res.status(500).json({ msg: error.message });
+  }
+}

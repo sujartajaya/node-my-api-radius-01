@@ -1,15 +1,16 @@
 import express from "express";
 import dotenv from "dotenv";
-
+import cors from "cors";
 import Customers from "./models/CustomersModel.js";
 import Users from "./models/UsersModel.js";
 import Radchecks from "./models/RadchecksModel.js";
-
+import AuthRoute from "./routes/AuthRoute.js";
 import CustomersRoute from "./routes/CustomersRoute.js";
 import UsersRoute from "./routes/UsersRoute.js";
 import RadchecksRoute from "./routes/RadchecksRoute.js";
-
+import cookieParser from "cookie-parser";
 import { db } from "./db/Database.js";
+import CustomerLogin from "./models/CustomerLoginModel.js";
 
 const app = express();
 
@@ -42,16 +43,19 @@ process.env.TZ = "Asia/Makassar";
   await Customers.sync();
   await Users.sync();
   await Radchecks.sync();
+  await CustomerLogin.sync();
 })();
 
+app.use(cors());
 app.use(express.json());
-
+app.use(cookieParser());
 //app.use(checkIP);
 
 app.get("/", (req, res) => {
   res.status(200).json({ msg: "Welcome!" });
 });
 
+app.use(AuthRoute);
 app.use(CustomersRoute);
 app.use(UsersRoute);
 app.use(RadchecksRoute);
