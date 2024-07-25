@@ -7,15 +7,17 @@ import {
   deleteUser,
   getLogin,
   getUsername,
+  getUserByCustomerId,
 } from "../controllers/Users.js";
-
+import { authorization, isAdmin } from "../controllers/Auth.js";
 const router = express.Router();
 
 router.get("/users", getUsers);
-router.get("/users/:id", getUser);
-router.post("/users", createUser);
-router.patch("/users/:id", updateUser);
-router.delete("/users/:id", deleteUser);
+router.get("/users/:id", authorization, getUser);
+router.get("/users/customer/:id/:offset/:limit", getUserByCustomerId);
+router.post("/users", authorization, createUser);
+router.patch("/users/:id", authorization, updateUser);
+router.delete("/users/:id", authorization, deleteUser);
 router.post("/user", getLogin);
-router.post("/checkuser", getUsername);
+router.post("/checkuser", authorization, getUsername);
 export default router;

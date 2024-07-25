@@ -1,10 +1,12 @@
 import CustomerLogin from "../models/CustomerLoginModel.js";
+import Customers from "../models/CustomersModel.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 export const Login = async (req, res) => {
     const { username, password } = req.body;
     const response = await CustomerLogin.findOne({
+        include: [{ model: Customers }],
         where: [
             {
                 username: username,
@@ -26,7 +28,7 @@ export const Login = async (req, res) => {
             });
             await CustomerLogin.update({ refresh_token: token }, { where: { id: response.id } });
             res.cookie('jwt',token, { httpOnly: true, maxAge: 3600000 });
-            res.status(200).json(payload);
+            res.status(200).json(response);
         } else {    
             res.status(404).json({ msg: "Password not match" });
         }
@@ -103,7 +105,15 @@ export const cookiesAuth = async (req, res) => {
         const token = jwt.sign(payload, process.env.TOKEN_KEY, {
                 expiresIn: "60s",
         });
-        res.status(200).json({ token });
+        const data = {
+            id: decoded.id,
+            uuid: decoded.uuid,
+            username: decoded.username,
+            role: decoded.role,
+            customerId: decoded.customerId,
+            token: token,
+        }
+        res.status(200).json({data});
     });
 }
 
@@ -111,6 +121,6 @@ export const isAdmin = async (req, res, next) => {
     if (req.role === "admin") {
         next();
     } else {
-        return res.status(401).json({ msg: "Admin Only" });
+        return res.status(403).json({ msg: "Admin Only" });
     }
 }

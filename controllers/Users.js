@@ -109,3 +109,39 @@ export const getUsername = async (req, res) => {
     res.status(500).json({ msg: error.mesaage });
   }
 };
+
+export const getUserByCustomerId = async (req, res) => {
+  let response;
+  const {id} = req.params;
+  try {
+    response = await Users.findAll({
+      where: [
+        {
+          customerId: id,
+        },
+      ],
+    });
+    res.status(200).json(response);
+  } catch (error) {
+    res.status(500).json({ msg: error.message });
+  }
+} 
+
+export const getUsersByLimit = async (req, res) => {
+  let response;
+  const { id, offset, limit } = req.params;
+  try {
+    response = await Users.findAll({
+      where: [
+        {
+          customerId: id,
+        },
+      ],
+      offset: parseInt(offset),
+      limit: parseInt(limit),
+    });
+    res.status(200).json(response);
+  } catch (error) {
+    res.status(500).json({ msg: error.message });
+  }
+}
